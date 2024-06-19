@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+// #include "Camera/CameraComponent.h"
+#include "EngineMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "CTestPlayerPawn.generated.h"
 
@@ -18,9 +19,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	TObjectPtr<UStaticMeshComponent> mMesh1;
-	UStaticMeshComponent* mMesh;
-	UPROPERTY(VisibleAnywhere);
+	UPROPERTY(VisibleAnywhere) UStaticMeshComponent* mMesh;
+	UPROPERTY(VisibleAnywhere) UCameraComponent* mCamera;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
