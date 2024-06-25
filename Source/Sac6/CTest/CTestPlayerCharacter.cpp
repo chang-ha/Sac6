@@ -17,10 +17,14 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	mArm->SetRelativeLocation(FVector(0.0, 0.0, 70.0));
 	mArm->SetRelativeRotation(FRotator(-10.0, 0.0, 0.0));
 	mArm->TargetArmLength = 500.f;
+	// Trigger
+	mArm->bInheritPitch = false;
+	mArm->bEnableCameraLag = true;
 
 	mCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyCamera"));
 	mCamera->SetupAttachment(mArm);
 
+	// Load Skeletal Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGideon/Characters/Heroes/Gideon/Skins/Tough/Meshes/Gideon_Tough.Gideon_Tough'"));
 
 	if (true == MeshAsset.Succeeded())
@@ -31,6 +35,18 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(94.f);
 	GetMesh()->SetRelativeLocation(FVector(0.0, 0.0, -94.0));
 	GetMesh()->SetRelativeRotation(FRotator(0.0, -90.0, 0.0));
+
+	// Use Controller Rotation
+	bUseControllerRotationYaw = true;
+
+	// Load BP ClassInfo
+	// Path(Reference Copy) + "_C"를 꼭 붙여줘야함
+	static ConstructorHelpers::FClassFinder<AActor> AttackClass(TEXT("/Script/Engine.Blueprint'/Game/Test/TestBlueprint/BP_TestActor.BP_TestActor_C'"));
+
+	if (AttackClass.Succeeded())
+	{
+		mAttackClass = AttackClass.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -39,7 +55,7 @@ void ACTestPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	// GetController()->IsPlayerController();
-	// Cast ~= dynamic_cast
+	// Cast == dynamic_cast
 	// Judge CurController is PlayerController
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
@@ -122,15 +138,32 @@ void ACTestPlayerCharacter::RotationAction(const FInputActionValue& Value)
 	// 4. FString == 출력하고자 하는 String
 	// * FString == (Unicode)UE에서 쓰는 문자열 클래스
 	// * Printf == 화면에 문자열 출력 X / 문자열을 만들어 주는 함수
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("X : %f Y : %f"), Axis.X, Axis.Y));
+	// GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("X : %f Y : %f"), Axis.X, Axis.Y));
+
+	AddControllerYawInput(Axis.X);
+
+	float _Delta = GetWorld()->GetDeltaSeconds();
+	mArm->AddRelativeRotation(FRotator(Axis.Y * 90.0 * _Delta, 0.0, 0.0));
 }
 
 void ACTestPlayerCharacter::AttackAction(const FInputActionValue& Value)
 {
-	
+	// BP클래스 끌어쓰는 방법
+	// 1. #include가 먼저 되어야함 << 근데 BP가 헤더파일이 있어?? X
+	//	   << UClass 정보를 가져와야함
+	//     << FClassFinder == 객체의 UClass정보를 가져옴 != FObjectFinder (객체를 가져옴)
+	//	   그렇게 해당 Class정보를 가져와서 해당 객체타입(지금은 BPClass)으로 Actor를 만들 수 있음
+	//	   그렇지만 마우스 클릭을 누를 떄 마다 UClass 정보를 가져올 필요는 없음 << 한번만 불러오면 됨
+	//	   TSubclassOf : UClass 정보를 저장하는 템플릿 객체이다.
+
+	FVector Location = GetActorLocation() + GetActorForwardVector() * 100.f;
+
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
+	GetWorld()->SpawnActor<AActor>(mAttackClass, Location, GetActorRotation(), Param);
 }
 
 void ACTestPlayerCharacter::ShieldAction(const FInputActionValue& Value)
 {
-
+	// C++코드로 액터 생성 방법
 }

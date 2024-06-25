@@ -23,6 +23,8 @@ protected:
 	UPROPERTY(VisibleAnywhere) USpringArmComponent* mArm = nullptr;
 	UPROPERTY(VisibleAnywhere) UCameraComponent* mCamera = nullptr;
 
+	// UClass정보를 저장하는 객체
+	TSubclassOf<AActor> mAttackClass;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
