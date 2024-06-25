@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputData.h"
+#include "CTestShield.h"
 
 // Sets default values
 ACTestPlayerCharacter::ACTestPlayerCharacter()
@@ -47,6 +48,13 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	{
 		mAttackClass = AttackClass.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<AActor> ShieldClass(TEXT("/Script/Engine.Blueprint'/Game/Test/TestBlueprint/BP_TestShield.BP_TestShield_C'"));
+
+	if (ShieldClass.Succeeded())
+	{
+		mShieldClass = ShieldClass.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -71,13 +79,13 @@ void ACTestPlayerCharacter::BeginPlay()
 		// 2. Priority == 0
 		Subsystem->AddMappingContext(InputData->mDefaultContext, 0);
 	}
+
 }
 
 // Called every frame
 void ACTestPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -166,4 +174,30 @@ void ACTestPlayerCharacter::AttackAction(const FInputActionValue& Value)
 void ACTestPlayerCharacter::ShieldAction(const FInputActionValue& Value)
 {
 	// C++코드로 액터 생성 방법
+	// #include "CTestPlayerPawn.h"
+	// GetWorld()->SpawnActor<ACTestPlayerPawn>();
+
+	if (false == mSkillFlag.EnableShield)
+	{
+		return;
+	}
+
+	// mSkillFlag.EnableShield = false;
+
+	FVector FrontLocation = GetActorLocation() + GetActorForwardVector() * 200.0;
+
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
+
+	for (int i = -1; i <= 1; i+=2)
+	{
+		// StaticClass : UClass정보를 꺼내오는 함수
+		AActor* _CurShield = GetWorld()->SpawnActor<ACTestShield>(ACTestShield::StaticClass(), FrontLocation * static_cast<double>(i), FRotator(0.0, 0.0, 0.0), Param);
+		// _CurShield->AttachToComponent(mRotationComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	}
+
+	for (int i = -1; i <= 1; i+=2)
+	{
+		// GetWorld()->SpawnActor<AActor>(mShieldClass);
+	}
 }

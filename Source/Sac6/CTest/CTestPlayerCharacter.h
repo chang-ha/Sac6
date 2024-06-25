@@ -12,6 +12,10 @@ class SAC6_API ACTestPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	struct SkillFlag
+	{
+		unsigned int EnableShield : 1 = true;
+	};
 public:
 	// Sets default values for this character's properties
 	ACTestPlayerCharacter();
@@ -24,7 +28,10 @@ protected:
 	UPROPERTY(VisibleAnywhere) UCameraComponent* mCamera = nullptr;
 
 	// UClass정보를 저장하는 객체
-	TSubclassOf<AActor> mAttackClass;
+	SkillFlag mSkillFlag;
+	TSubclassOf<AActor> mAttackClass = nullptr;
+
+	TSubclassOf<AActor> mShieldClass = nullptr;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
