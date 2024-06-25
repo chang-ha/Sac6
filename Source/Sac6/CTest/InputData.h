@@ -26,4 +26,7 @@ public:
 	UInputMappingContext* mDefaultContext = nullptr;
 public:
 	UInputAction* mMove = nullptr;
+	UInputAction* mRotation = nullptr;
+	UInputAction* mAttack = nullptr;
+	UInputAction* mShield = nullptr;
 };

@@ -3,7 +3,7 @@
 #pragma once
 
 // #include "Camera/CameraComponent.h"
-#include "EngineMinimal.h"
+#include "../GameInfo.h"
 #include "GameFramework/Pawn.h"
 #include "CTestPlayerPawn.generated.h"
 

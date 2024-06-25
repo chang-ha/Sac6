@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "../GameInfo.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "CTestPlayerCharacter.generated.h"
 
 UCLASS()
@@ -19,6 +20,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere) USpringArmComponent* mArm = nullptr;
+	UPROPERTY(VisibleAnywhere) UCameraComponent* mCamera = nullptr;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -26,4 +30,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	void MoveAction(const FInputActionValue& Value);
+	void RotationAction(const FInputActionValue& Value);
+	void AttackAction(const FInputActionValue& Value);
+	void ShieldAction(const FInputActionValue& Value);
 };
