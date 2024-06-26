@@ -5,6 +5,7 @@
 #include "../GameInfo.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "GameFramework/RotatingMovementComponent.h"
 #include "CTestPlayerCharacter.generated.h"
 
 UCLASS()
@@ -14,7 +15,7 @@ class SAC6_API ACTestPlayerCharacter : public ACharacter
 
 	struct SkillFlag
 	{
-		unsigned int EnableShield : 1 = true;
+		bool EnableShield : 1 = true;
 	};
 public:
 	// Sets default values for this character's properties
@@ -28,11 +29,16 @@ protected:
 	UPROPERTY(VisibleAnywhere) UCameraComponent* mCamera = nullptr;
 
 	// UClass정보를 저장하는 객체
-	SkillFlag mSkillFlag;
 	TSubclassOf<AActor> mAttackClass = nullptr;
 
 	TSubclassOf<AActor> mShieldClass = nullptr;
-public:	
+	UPROPERTY(VisibleAnywhere) USceneComponent* mRotation= nullptr;
+	UPROPERTY(VisibleAnywhere) URotatingMovementComponent* mRotMovement = nullptr;
+
+	SkillFlag	mSkillFlag;
+	float		mShieldTime = 0.f;
+	float		mShieldCoolDown = 6.f;
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -44,4 +50,5 @@ protected:
 	void RotationAction(const FInputActionValue& Value);
 	void AttackAction(const FInputActionValue& Value);
 	void ShieldAction(const FInputActionValue& Value);
+	void TripleShotAction(const FInputActionValue& Value);
 };

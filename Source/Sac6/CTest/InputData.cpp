@@ -70,4 +70,18 @@ UTestInputData::UTestInputData()
 			mShield = Asset.Object;
 		}
 	}
+
+
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction>
+			Asset(TEXT("/Script/EnhancedInput.InputAction'/Game/Test/TestInput/IA_TripleShot.IA_TripleShot'"));
+
+		// 정상적으로 로딩했는지 판단한다
+		if (Asset.Succeeded())
+		{
+			// 성공했을 경우 불러온 에셋을 멤버변수에 지정한다.
+			// 얘가 InputContext를 들고있을것임
+			mTripleShot = Asset.Object;
+		}
+	}
 }

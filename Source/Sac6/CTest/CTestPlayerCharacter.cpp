@@ -25,6 +25,11 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	mCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyCamera"));
 	mCamera->SetupAttachment(mArm);
 
+	mRotation = CreateDefaultSubobject<USceneComponent>(TEXT("ShieldRotator"));
+	mRotation->SetupAttachment(RootComponent);
+
+	mRotMovement = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotMovement"));
+	mRotMovement->SetUpdatedComponent(mRotation);
 	// Load Skeletal Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGideon/Characters/Heroes/Gideon/Skins/Tough/Meshes/Gideon_Tough.Gideon_Tough'"));
 
@@ -86,6 +91,17 @@ void ACTestPlayerCharacter::BeginPlay()
 void ACTestPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (!mSkillFlag.EnableShield)
+	{
+		mShieldTime += DeltaTime;
+
+		if (mShieldTime >= mShieldCoolDown)
+		{
+			mSkillFlag.EnableShield = true;
+			mShieldTime = 0.f;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -112,7 +128,6 @@ void ACTestPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			this,
 			&ACTestPlayerCharacter::RotationAction);
 
-
 		EnhancedInputComponent->BindAction(
 			InputData->mAttack,
 			ETriggerEvent::Started,
@@ -124,6 +139,12 @@ void ACTestPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			ETriggerEvent::Started,
 			this,
 			&ACTestPlayerCharacter::ShieldAction);
+
+		EnhancedInputComponent->BindAction(
+			InputData->mTripleShot,
+			ETriggerEvent::Started,
+			this,
+			&ACTestPlayerCharacter::TripleShotAction);
 	}
 }
 
@@ -177,27 +198,92 @@ void ACTestPlayerCharacter::ShieldAction(const FInputActionValue& Value)
 	// #include "CTestPlayerPawn.h"
 	// GetWorld()->SpawnActor<ACTestPlayerPawn>();
 
-	if (false == mSkillFlag.EnableShield)
-	{
+	 if (!mSkillFlag.EnableShield)
+	 {
 		return;
-	}
+	 }
 
-	// mSkillFlag.EnableShield = false;
-
-	FVector FrontLocation = GetActorLocation() + GetActorForwardVector() * 200.0;
+	 mSkillFlag.EnableShield = false;
+	 mShieldTime = 0.f;
 
 	FActorSpawnParameters Param;
 	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
 
-	for (int i = -1; i <= 1; i+=2)
+	FVector ShieldLocation = FVector::ZeroVector;
+	FRotator Rot = FRotator::ZeroRotator;
+	for (int32 i = 0; i < 4; i++)
 	{
-		// StaticClass : UClass정보를 꺼내오는 함수
-		AActor* _CurShield = GetWorld()->SpawnActor<ACTestShield>(ACTestShield::StaticClass(), FrontLocation * static_cast<double>(i), FRotator(0.0, 0.0, 0.0), Param);
-		// _CurShield->AttachToComponent(mRotationComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	}
+		switch (i)
+		{	
+		case 0:
+			ShieldLocation = GetActorLocation() + GetActorForwardVector() * 200.0;
+			Rot.Yaw = 0.0;
+			break;
+		case 1:
+			ShieldLocation = GetActorLocation() + GetActorForwardVector() * -200.0;
+			Rot.Yaw = 180.0;
+			break;
+		case 2:
+			ShieldLocation = GetActorLocation() + GetActorRightVector() * 200.0;
+			Rot.Yaw = 90.0;
+			break;
+		case 3:
+			ShieldLocation = GetActorLocation() + GetActorRightVector() * -200.0;
+			Rot.Yaw = 270.0;
+			break;
+		default:
+			// Error
+			break;
+		}
+		AActor* _CurShield = GetWorld()->SpawnActor<ACTestShield>(ACTestShield::StaticClass(), ShieldLocation, GetActorRotation() + Rot, Param);
+		_CurShield->AttachToComponent(mRotation, FAttachmentTransformRules::KeepWorldTransform);
+	}  
 
-	for (int i = -1; i <= 1; i+=2)
+	// 위 결과와 아래 결과 다름 X -> 회전값의 차이 발생
+	// 왜 ? 나중에 물어보자
+	//for (int32 i = 0; i < 4; i++)
+	//{
+	//	switch (i)
+	//	{
+	//	case 0:
+	//		ShieldLocation = GetActorForwardVector() * 200.0;
+	//		Rot.Yaw = 0.0;
+	//		break;
+	//	case 1:
+	//		ShieldLocation = GetActorForwardVector() * -200.0;
+	//		Rot.Yaw = 180.0;
+	//		break;
+	//	case 2:
+	//		ShieldLocation = GetActorRightVector() * 200.0;
+	//		Rot.Yaw = 90.0;
+	//		break;
+	//	case 3:
+	//		ShieldLocation = GetActorRightVector() * -200.0;
+	//		Rot.Yaw = 270.0;
+	//		break;
+	//	default:
+	//		// Error
+	//		break;
+	//	}
+	//	AActor* _CurShield = GetWorld()->SpawnActor<ACTestShield>(ACTestShield::StaticClass(), ShieldLocation, Rot, Param);
+	//	_CurShield->AttachToComponent(mRotation, FAttachmentTransformRules::KeepRelativeTransform);
+	//}
+}
+
+void ACTestPlayerCharacter::TripleShotAction(const FInputActionValue& Value)
+{
+	FVector BulletLocation = GetActorLocation() + 
+		GetActorForwardVector() * 100.f + 
+		GetActorRightVector() * -100.f;
+
+	FRotator BulletRot = FRotator::ZeroRotator;
+	BulletRot.Yaw -= 45.f;
+
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
+
+	for (int i = 0; i < 3; i++)
 	{
-		// GetWorld()->SpawnActor<AActor>(mShieldClass);
+		GetWorld()->SpawnActor<AActor>(mAttackClass, BulletLocation + GetActorRightVector() * i * 100.f, GetActorRotation() + BulletRot + FRotator(0.0, i * 45.f, 0.0), Param);
 	}
 }

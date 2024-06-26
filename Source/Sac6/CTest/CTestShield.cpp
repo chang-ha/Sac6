@@ -19,7 +19,7 @@ ACTestShield::ACTestShield()
 	}
 
 	mMesh->SetRelativeScale3D(FVector(0.2, 0.5, 0.5));
-
+	SetLifeSpan(5.f);
 }
 
 // Called when the game starts or when spawned
