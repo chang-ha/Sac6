@@ -60,6 +60,10 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	{
 		mShieldClass = ShieldClass.Class;
 	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
+	// GetMesh()->SetCollisionProfileName(TEXT(""));
 }
 
 // Called when the game starts or when spawned
