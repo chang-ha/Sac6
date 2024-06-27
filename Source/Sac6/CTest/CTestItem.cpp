@@ -2,6 +2,7 @@
 
 
 #include "CTestItem.h"
+#include "CTestGameMode.h"
 
 // Sets default values
 ACTestItem::ACTestItem()
@@ -33,6 +34,12 @@ void ACTestItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Block 일때 부딪히면 발생
+	// mBody->OnComponentHit
+
+	// OverLap일때
+	mBody->OnComponentBeginOverlap.AddDynamic(this, &ACTestItem::CollisionBeginOverlap);
+	mBody->OnComponentEndOverlap.AddDynamic(this, &ACTestItem::CollisionEndOverlap);
 }
 
 // Called every frame
@@ -42,3 +49,34 @@ void ACTestItem::Tick(float DeltaTime)
 
 }
 
+
+void ACTestItem::CollisionBeginOverlap(
+	UPrimitiveComponent*	OverlappedComponent,
+	AActor*					OtherActor,
+	UPrimitiveComponent*	OtherComp,
+	int32					OtherBodyIndex,
+	bool					bFromSweep,
+	const FHitResult&		SweepResult)
+{
+	UE_LOG(Sac6, Warning, TEXT("Begin Overlap"));
+
+	// 액터 제거 함수
+
+	ACTestGameMode* GameMode = GetWorld()->GetAuthGameMode<ACTestGameMode>();
+
+	if (GameMode)
+	{
+		GameMode->AddScore(10);
+	}
+
+	Destroy();
+}
+
+void ACTestItem::CollisionEndOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32					OtherBodyIndex)
+{
+	UE_LOG(Sac6, Warning, TEXT("End Overlap"));
+}
