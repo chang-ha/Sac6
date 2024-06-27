@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputData.h"
 #include "CTestShield.h"
+#include "CTestBullet.h"
 
 // Sets default values
 ACTestPlayerCharacter::ACTestPlayerCharacter()
@@ -193,7 +194,10 @@ void ACTestPlayerCharacter::AttackAction(const FInputActionValue& Value)
 
 	FActorSpawnParameters Param;
 	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
-	GetWorld()->SpawnActor<AActor>(mAttackClass, Location, GetActorRotation(), Param);
+	// GetWorld()->SpawnActor<AActor>(mAttackClass, Location, GetActorRotation(), Param);
+
+	// C++클래스를 생성하는법
+	GetWorld()->SpawnActor<ACTestBullet>(Location, GetActorRotation(), Param);
 }
 
 void ACTestPlayerCharacter::ShieldAction(const FInputActionValue& Value)
