@@ -18,21 +18,33 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* mBody = nullptr;
+	USphereComponent*				mBody = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* mMesh = nullptr;
+	UStaticMeshComponent*			mMesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* mMovement = nullptr;
+	UProjectileMovementComponent*	mMovement = nullptr;
+
+	float							mDistance = 2000.f;
+	FVector							mPrevLocation = FVector::ZeroVector;
+
+	AController*					mOwnerController = nullptr;
+	float							mDamage = 10.f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void ProjectileHit(const FHitResult& _HitResult);
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void SetController(AController* _Controller)
+	{
+		mOwnerController = _Controller;
+	}
 };

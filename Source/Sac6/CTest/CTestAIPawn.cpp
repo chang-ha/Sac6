@@ -39,6 +39,27 @@ void ACTestAIPawn::BeginPlay()
 	
 }
 
+float ACTestAIPawn::TakeDamage(
+	float DamageAmount,
+	struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	// CanBeDamaged = false일 경우 0을 반환함
+	DamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Damage : %5.f"), DamageAmount));
+
+	mHP -= DamageAmount;
+
+	if (0.f >= mHP)
+	{
+		Destroy();
+	}
+
+	return DamageAmount;
+}
+
 // Called every frame
 void ACTestAIPawn::Tick(float DeltaTime)
 {

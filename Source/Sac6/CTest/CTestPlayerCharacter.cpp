@@ -65,6 +65,14 @@ ACTestPlayerCharacter::ACTestPlayerCharacter()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 	// GetMesh()->SetCollisionProfileName(TEXT(""));
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance>
+		AnimClass(TEXT("/Script/Engine.AnimBlueprint'/Game/Test/TestBlueprint/ABP_Gideon.ABP_Gideon_C'"));
+
+	if (AnimClass.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(AnimClass.Class);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -197,7 +205,8 @@ void ACTestPlayerCharacter::AttackAction(const FInputActionValue& Value)
 	// GetWorld()->SpawnActor<AActor>(mAttackClass, Location, GetActorRotation(), Param);
 
 	// C++클래스를 생성하는법
-	GetWorld()->SpawnActor<ACTestBullet>(Location, GetActorRotation(), Param);
+	ACTestBullet* Bullet = GetWorld()->SpawnActor<ACTestBullet>(Location, GetActorRotation(), Param);
+	Bullet->SetController(GetController());
 }
 
 void ACTestPlayerCharacter::ShieldAction(const FInputActionValue& Value)

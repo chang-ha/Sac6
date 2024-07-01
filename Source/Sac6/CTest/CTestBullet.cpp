@@ -25,10 +25,13 @@ ACTestBullet::ACTestBullet()
 
 	mBody->SetSphereRadius(50.f);
 	mMovement->InitialSpeed = 1500.f;
+	mMovement->ProjectileGravityScale = 0.f;
 	mMovement->bShouldBounce = false;
 
 	mBody->SetCollisionProfileName(TEXT("PlayerAttack"));
 	mMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +40,7 @@ void ACTestBullet::BeginPlay()
 	Super::BeginPlay();
 
 	mMovement->OnProjectileStop.AddDynamic(this, &ACTestBullet::ProjectileHit);
+	mPrevLocation = GetActorLocation();
 }
 
 // Called every frame
@@ -44,6 +48,18 @@ void ACTestBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector Location = GetActorLocation();
+	float	Distane = FVector::Distance(mPrevLocation, Location);
+	// FVector Dir = Location - mPrevLocation;
+	// float Distance = Dir.Length();
+
+	mDistance -= Distane;
+	if (mDistance <= 0.f)
+	{
+		Destroy();
+	}
+
+	mPrevLocation = Location;
 }
 
 void ACTestBullet::ProjectileHit(const FHitResult& _HitResult)
@@ -90,11 +106,17 @@ void ACTestBullet::ProjectileHit(const FHitResult& _HitResult)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, _HitResult.ImpactPoint, _HitResult.ImpactNormal.Rotation(), true);
 	}
 
-	USoundBase* Sound = LoadObject<USoundBase>(GetWorld(),
-		TEXT(""));
+	USoundBase* Sound = LoadObject<USoundBase>(
+		GetWorld(),
+		TEXT("/Script/Engine.SoundWave'/Game/InfinityBladeEffects/Sound/bone2.bone2'"));
 
 	if (IsValid(Sound))
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, /*_HitResult.ImpactNormal*/_HitResult.ImpactPoint);
 	}
+
+	FDamageEvent DmgEvent;
+	_HitResult.GetActor()->TakeDamage(mDamage, DmgEvent, mOwnerController, this);
+
+	Destroy();
 }
